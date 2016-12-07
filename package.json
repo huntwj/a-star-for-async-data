@@ -1,0 +1,27 @@
+{
+  "name": "node-async-astar",
+  "version": "1.0.0",
+  "description": "Flexible A* search algorithm implemented asynchrously using generator/yield constructs.\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "jasmin"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/huntwj/node-async-astar.git"
+  },
+  "keywords": [
+    "astar",
+    "search",
+    "async",
+    "node",
+    "dijkstra",
+    "algorithm"
+  ],
+  "author": "Wil Hunt <huntwj@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/huntwj/node-async-astar/issues"
+  },
+  "homepage": "https://github.com/huntwj/node-async-astar#readme"
+}

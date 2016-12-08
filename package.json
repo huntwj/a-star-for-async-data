@@ -23,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/huntwj/node-async-astar/issues"
   },
-  "homepage": "https://github.com/huntwj/node-async-astar#readme"
+  "homepage": "https://github.com/huntwj/node-async-astar#readme",
+  "devDependencies": {
+    "jasmine": "^2.5.2"
+  }
 }

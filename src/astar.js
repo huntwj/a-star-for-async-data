@@ -60,7 +60,7 @@ class Astar
 	}
 
 	exactMatchGoalFunc(node1, node2) {
-		return promiseReturn(node1 === node2);
+		return promiseReturn(this.nodeId(node1) === this.nodeId(node2));
 	}
 
 	nodeId(node) {
@@ -72,6 +72,7 @@ class Astar
 	}
 
 	*findPathGenerator(startNode, goalFunc) {
+		// Provide a default goalFunc if the user provided a node goal instead of a function.
 		if (goalFunc && {}.toString.call(goalFunc) !== '[object Function]') {
 			goalFunc = this.exactMatchGoalFunc.bind(this, goalFunc);
 		}

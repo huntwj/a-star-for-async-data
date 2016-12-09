@@ -37,7 +37,7 @@ describe("The A* search object", function () {
 		return nodeList;
 	}
 
-	function getEdgesLeavingNode(node) {
+	function exitArcsForNodeId(node) {
 		return allEdges.filter(function (edge) {
 			return edge.from === node;
 		});
@@ -49,48 +49,21 @@ describe("The A* search object", function () {
 	describe("Async API", function () {
 
 		let callbackFuncs = {
-			getEdgesLeavingNode: getEdgesLeavingNode
+			exitArcsForNodeId: exitArcsForNodeId
 		};
 
 		beforeAll(function () {
 			astar = new Astar(callbackFuncs);
 		});
 
-		it("should have a default heuristic h() function that returns 0 for all possible connections", function (done) {
+		it("should have a default heuristic h() function that returns 0 for all possible connections", function () {
 			var h = astar.h;
 
 			var promises = [];
 			allNodes.forEach(function (from) {
 				allNodes.forEach(function (to) {
-					var promise = h(from, to).then(function (cost) {
-						expect(cost).toBe(0);
-					}).catch(function (reason) {
-						fail("Invalid default heuristic return for " + from + " -> " + to + ": " + reason);
-					});
-					promises.push(promise);
+					expect(h(from, to)).toBe(0);
 				});
-			});
-
-			Promise.all(promises).then(function () {
-				done();
-			});
-		});
-
-		it("should have a default edge cost function edgeCost that returns the cost property of the edge object", function (done) {
-			var edgeCost = astar.edgeCost;
-
-			var promises = [];
-			allEdges.forEach(function (edge) {
-				var promise = edgeCost(edge).then(function (cost) {
-					expect(cost).toBe(edge.cost);
-				}).catch(function (reason) {
-					fail("Invalid default heuristic return for " + from + " -> " + to + ": " + reason);
-				});
-				promises.push(promise);
-			});
-
-			Promise.all(promises).then(function () {
-				done();
 			});
 		});
 
@@ -103,7 +76,7 @@ describe("The A* search object", function () {
 
 				done();
 			}).catch(function (reason) {
-				fail("Unexpect error executing findPath");
+				fail("Unexpect error executing findPath: " + reason);
 			});
 		});
 
@@ -119,7 +92,7 @@ describe("The A* search object", function () {
 
 				done();
 			}).catch(function (reason) {
-				fail("Unexpect error executing findPath");
+				fail("Unexpect error executing findPath: " + reason);
 			});
 		});
 
@@ -134,7 +107,7 @@ describe("The A* search object", function () {
 
 				done();
 			}).catch(function (reason) {
-				fail("Unexpect error executing findPath");
+				fail("Unexpect error executing findPath: " + reason);
 			});
 		});
 
@@ -152,8 +125,18 @@ describe("The A* search object", function () {
 
 				done();
 			}).catch(function (reason) {
-				fail("Unexpect error executing findPath");
+				fail("Unexpect error executing findPath: " + reason);
 			});
+		});
+
+		it("should return a nice error message when there is no path to the goal", function (done) {
+			astar.findPath("a", "f")
+				.then(function(path) {
+					fail("Got an unexpected path");
+				}).catch(function (reason) {
+					expect(reason).toBe("No path to goal");
+					done();
+				});
 		});
 
 	});

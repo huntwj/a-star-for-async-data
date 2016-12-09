@@ -1,17 +1,18 @@
 {
-  "name": "node-async-astar",
+  "name": "a-star-for-async-data",
   "version": "1.0.0",
-  "description": "Flexible A* search algorithm implemented asynchrously using generator/yield constructs.\"",
+  "description": "A* search algorithm for asynchronous data sources",
   "main": "index.js",
   "scripts": {
     "test": "jasmin"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/huntwj/node-async-astar.git"
+    "url": "git+https://github.com/huntwj/a-star-for-async-data.git"
   },
   "keywords": [
     "astar",
+    "a-star",
     "search",
     "async",
     "node",
@@ -21,9 +22,9 @@
   "author": "Wil Hunt <huntwj@gmail.com>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/huntwj/node-async-astar/issues"
+    "url": "https://github.com/huntwj/a-star-for-async-data/issues"
   },
-  "homepage": "https://github.com/huntwj/node-async-astar#readme",
+  "homepage": "https://github.com/huntwj/a-star-for-async-data#readme",
   "devDependencies": {
     "jasmine": "^2.5.2"
   }

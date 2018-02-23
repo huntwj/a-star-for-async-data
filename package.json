@@ -1,6 +1,6 @@
 {
   "name": "a-star-for-async-data",
-  "version": "1.0.2-rc2",
+  "version": "1.0.2-rc3",
   "description": "A* search algorithm for asynchronous data sources",
   "main": "index.js",
   "files": [

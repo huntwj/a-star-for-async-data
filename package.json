@@ -2,7 +2,8 @@
   "name": "a-star-for-async-data",
   "version": "1.0.2",
   "description": "A* search algorithm for asynchronous data sources",
-  "main": "index.js",
+  "main": "dist/src/astar.js",
+  "types": "dist/src/astar.d.ts",
   "files": [
     "dist"
   ],

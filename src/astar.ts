@@ -17,16 +17,16 @@ interface ICostMap {
 	[key: string]: number;
 }
 
-interface IPathMap {
-	[key: string]: IGraphEdge | false;
+interface IPathMap<T extends IGraphEdge> {
+	[key: string]: T | false;
 }
 
 interface IBooleanMap {
 	[key: string]: boolean;
 }
 
-export interface IAstarOptions {
-	exitArcsForNodeId?: (f: GraphNode) => IGraphEdge[];
+export interface IAstarOptions<T extends IGraphEdge> {
+	exitArcsForNodeId?: (f: GraphNode) => T[];
 	h?: (f: GraphNode, t: GraphNode) => number;
 }
 
@@ -44,19 +44,19 @@ function log(msg: string) {
 	}
 }
 
-export interface IGraphPath {
+export interface IGraphPath<T extends IGraphEdge = IGraphEdge> {
 	cost: number;
-	path: IGraphEdge[];
+	path: T[];
 }
 
-type PathGenerator = IterableIterator<Promise<boolean> | Promise<IGraphEdge[]> | Promise<number> | IGraphPath>
+type PathGenerator<T extends IGraphEdge> = IterableIterator<Promise<boolean> | Promise<T[]> | Promise<number> | IGraphPath<T>>
 
 // fn runGenerator : based on code by Kyle Simpson (https://davidwalsh.name/async-generators on Dec 7, 2016)
-function runGenerator(it: PathGenerator): Promise<IGraphPath> {
+function runGenerator<T extends IGraphEdge>(it: PathGenerator<T>): Promise<IGraphPath<T>> {
     var ret: any;
     var value: any = undefined;
 
-    var promise = new Promise<IGraphPath>((resolve, reject) => {
+    var promise = new Promise<IGraphPath<T>>((resolve, reject) => {
     // asynchronously iterate over generator
 	    (function iterate(val){
 	    	try {
@@ -89,9 +89,9 @@ function runGenerator(it: PathGenerator): Promise<IGraphPath> {
     return promise;
 }
 
-export class Astar
+export class Astar<T extends IGraphEdge = IGraphEdge>
 {
-	constructor(customCallbackFuncs: IAstarOptions = {}) {
+	constructor(customCallbackFuncs: IAstarOptions<T> = {}) {
 		this.exitArcsForNodeId = customCallbackFuncs.exitArcsForNodeId || this.exitArcsForNodeId;
 		this.h = customCallbackFuncs.h || this.h;
 	}
@@ -150,12 +150,12 @@ export class Astar
 	 * ]
 	 *
 	 */
-	exitArcsForNodeId(nodeId: GraphNode): IGraphEdge[] {
+	exitArcsForNodeId(nodeId: GraphNode): T[] {
 		return [];
 	}
 
 	// Promisify exitArcsForNodeId
-	lookupExitArcsForNodeId(nodeId: GraphNode): Promise<IGraphEdge[]> {
+	lookupExitArcsForNodeId(nodeId: GraphNode): Promise<T[]> {
 		return Promise.resolve(this.exitArcsForNodeId(nodeId));
 	}
 
@@ -167,7 +167,7 @@ export class Astar
 		startNodeId = String(startNodeId);
 
 		log("Finding path between " + startNodeId + " and " + goalOrGoalFunc);
-		var cameFrom: IPathMap = {};
+		var cameFrom: IPathMap<T> = {};
 		var fCosts: ICostMap = {};
 		var gCosts: ICostMap = {};
 		var open: INodeMap = {};
@@ -201,7 +201,7 @@ export class Astar
 			}
 
 			// TODO: In fact we can do all the calls here in one place.
-			var edges: IGraphEdge[] = yield this.lookupExitArcsForNodeId(bestId);
+			var edges: T[] = yield this.lookupExitArcsForNodeId(bestId);
 			for (let edge of edges) {
 				// TODO: Simplify this to provide a single data structure.
 				var toNodeId = String(edge.to);
@@ -240,9 +240,9 @@ export class Astar
 		};
 	}
 
-	findPath(startNodeId: GraphNode, goalFunc: Goal): Promise<IGraphPath> {
+	findPath(startNodeId: GraphNode, goalFunc: Goal): Promise<IGraphPath<T>> {
 		const pathGenerator = this.findPathGenerator(startNodeId, goalFunc);
-		return runGenerator(pathGenerator);
+		return runGenerator<T>(pathGenerator);
 	}
 
 	public static Debug: () => typeof Astar;

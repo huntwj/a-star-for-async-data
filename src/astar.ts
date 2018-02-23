@@ -52,11 +52,11 @@ export interface IGraphPath {
 type PathGenerator = IterableIterator<Promise<boolean> | Promise<IGraphEdge[]> | Promise<number> | IGraphPath>
 
 // fn runGenerator : based on code by Kyle Simpson (https://davidwalsh.name/async-generators on Dec 7, 2016)
-function runGenerator(it: PathGenerator) {
+function runGenerator(it: PathGenerator): Promise<IGraphPath> {
     var ret: any;
     var value: any = undefined;
 
-    var promise = new Promise((resolve, reject) => {
+    var promise = new Promise<IGraphPath>((resolve, reject) => {
     // asynchronously iterate over generator
 	    (function iterate(val){
 	    	try {
@@ -240,7 +240,7 @@ export class Astar
 		};
 	}
 
-	findPath(startNodeId: GraphNode, goalFunc: Goal) {
+	findPath(startNodeId: GraphNode, goalFunc: Goal): Promise<IGraphPath> {
 		const pathGenerator = this.findPathGenerator(startNodeId, goalFunc);
 		return runGenerator(pathGenerator);
 	}

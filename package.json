@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "test": "jasmine"
+    "test": "jasmine-ts"
   },
   "repository": {
     "type": "git",
@@ -27,7 +27,9 @@
   },
   "homepage": "https://github.com/huntwj/a-star-for-async-data#readme",
   "devDependencies": {
+    "@types/jasmine": "^2.8.6",
     "jasmine": "^3.0.0",
+    "jasmine-ts": "^0.2.1",
     "typescript": "^2.7.2"
   }
 }

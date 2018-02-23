@@ -9,7 +9,7 @@
   "scripts": {
     "build": "tsc",
     "test": "jasmine-ts",
-    "prepublish": "npm run build && npm test"
+    "prepublish": "rimraf dist && npm run build && npm test"
   },
   "repository": {
     "type": "git",
@@ -34,6 +34,7 @@
     "@types/jasmine": "^2.8.6",
     "jasmine": "^3.0.0",
     "jasmine-ts": "^0.2.1",
+    "rimraf": "^2.6.2",
     "typescript": "^2.7.2"
   }
 }

@@ -1,1 +1,1 @@
-module.exports = require("./dist/astar.js");
+module.exports = require("./dist/src/astar.js");

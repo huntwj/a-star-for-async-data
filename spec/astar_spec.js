@@ -43,7 +43,8 @@ describe("The A* search object", function () {
 		});
 	}
 
-	var Astar = require("../src/astar.js");
+	var AstarAll = require("../dist/astar.js");
+	var Astar = AstarAll.Astar;
 	allNodes = allNodes();
 
 	describe("Async API", function () {

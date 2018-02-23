@@ -1,3 +1,34 @@
+export type GraphNode = string;
+
+export interface IGraphEdge {
+	from :GraphNode;
+	to: GraphNode;
+	cost: number;
+}
+
+export type GoalFunction = (_: GraphNode) => boolean;
+export type Goal = GraphNode | GoalFunction;
+
+interface INodeMap {
+	[key: string]: GraphNode;
+}
+
+interface ICostMap {
+	[key: string]: number;
+}
+
+interface IPathMap {
+	[key: string]: IGraphEdge | false;
+}
+
+interface IBooleanMap {
+	[key: string]: boolean;
+}
+
+export interface IAstarOptions {
+	exitArcsForNodeId?: (f: GraphNode) => IGraphEdge[];
+	h?: (f: GraphNode, t: GraphNode) => number;
+}
 
 const logLevels = {
 	'none': 0,
@@ -7,16 +38,23 @@ const logLevels = {
 
 var log_level = 0;
 
-function log(msg) {
+function log(msg: string) {
 	if (log_level >= logLevels.info) {
 		console.log(msg);
 	}
 }
 
+export interface IGraphPath {
+	cost: number;
+	path: IGraphEdge[];
+}
+
+type PathGenerator = IterableIterator<Promise<boolean> | Promise<IGraphEdge[]> | Promise<number> | IGraphPath>
+
 // fn runGenerator : based on code by Kyle Simpson (https://davidwalsh.name/async-generators on Dec 7, 2016)
-function runGenerator(it) {
-    var ret;
-    var value = undefined;
+function runGenerator(it: PathGenerator) {
+    var ret: any;
+    var value: any = undefined;
 
     var promise = new Promise((resolve, reject) => {
     // asynchronously iterate over generator
@@ -51,27 +89,27 @@ function runGenerator(it) {
     return promise;
 }
 
-class Astar
+export class Astar
 {
-	constructor(customCallbackFuncs = {}) {
+	constructor(customCallbackFuncs: IAstarOptions = {}) {
 		this.exitArcsForNodeId = customCallbackFuncs.exitArcsForNodeId || this.exitArcsForNodeId;
 		this.h = customCallbackFuncs.h || this.h;
 	}
 
 	// Calculate the heuristic cost to traverse from one node to another.
-	h(from, to) {
+	public h(from: GraphNode, to: GraphNode) {
 		return 0;
 	}
 
 	// Promisify h
-	lookupH(from, to) {
+	public lookupH(from: GraphNode, to: GraphNode) {
 		return Promise.resolve(this.h(from, to));
 	}
 
 	// This function is used to test the goal state if the user provides a non function
 	// for the search goal.
-	exactMatchGoalFunc(goalNodeId) {
-		return function (testNodeId) {
+	public exactMatchGoalFunc(goalNodeId: GraphNode) {
+		return function(testNodeId: GraphNode) {
 			return Promise.resolve(goalNodeId === testNodeId);
 		}
 	}
@@ -88,13 +126,14 @@ class Astar
 	 * TODO: Perhaps we can have a built in function to handle arrays?
 	 *       (Or is that best left to the caller?)
 	 */
-	cleanGoalFunc(goalOrGoalFunc) {
+	public cleanGoalFunc(goalOrGoalFunc: Goal) {
 		if (goalOrGoalFunc && {}.toString.call(goalOrGoalFunc) !== '[object Function]') {
 			return this.exactMatchGoalFunc(String(goalOrGoalFunc));
 		} else {
+			const goalFunc = goalOrGoalFunc as GoalFunction;
 			// A goal function was provided. Le'ts be sure it's promisified.
-			return function(a) {
-				return Promise.resolve(goalOrGoalFunc(a));
+			return function(a: GraphNode) {
+				return Promise.resolve(goalFunc(a));
 			}
 		}
 	}
@@ -111,34 +150,34 @@ class Astar
 	 * ]
 	 *
 	 */
-	exitArcsForNodeId(nodeId) {
+	exitArcsForNodeId(nodeId: GraphNode): IGraphEdge[] {
 		return [];
 	}
 
 	// Promisify exitArcsForNodeId
-	lookupExitArcsForNodeId(nodeId) {
+	lookupExitArcsForNodeId(nodeId: GraphNode): Promise<IGraphEdge[]> {
 		return Promise.resolve(this.exitArcsForNodeId(nodeId));
 	}
 
 	// By "extracting" the find path into a generator we can use synchronous-y constructs
 	// while still providing async functionalities.
-	*findPathGenerator(startNodeId, goalOrGoalFunc) {
+	private *findPathGenerator(startNodeId: GraphNode, goalOrGoalFunc: Goal) {
 		// Provide a default goalFunc if the user provided a node goal instead of a function.
 		var goalFunc = this.cleanGoalFunc(goalOrGoalFunc);
 		startNodeId = String(startNodeId);
 
 		log("Finding path between " + startNodeId + " and " + goalOrGoalFunc);
-		var cameFrom = {};
-		var fCosts = {};
-		var gCosts = {};
-		var open = {};
-		var closed = {};
+		var cameFrom: IPathMap = {};
+		var fCosts: ICostMap = {};
+		var gCosts: ICostMap = {};
+		var open: INodeMap = {};
+		var closed: IBooleanMap = {};
 		var iteration = 1;
 
 		open[startNodeId] = startNodeId;
 		cameFrom[startNodeId] = false;
 		gCosts[startNodeId] = 0;
-		fCosts[startNodeId] = yield this.h(startNodeId);
+		fCosts[startNodeId] = 0; // Is this correct?
 
 		while (true)
 		{
@@ -162,7 +201,7 @@ class Astar
 			}
 
 			// TODO: In fact we can do all the calls here in one place.
-			var edges = yield this.lookupExitArcsForNodeId(bestId);
+			var edges: IGraphEdge[] = yield this.lookupExitArcsForNodeId(bestId);
 			for (let edge of edges) {
 				// TODO: Simplify this to provide a single data structure.
 				var toNodeId = String(edge.to);
@@ -201,31 +240,15 @@ class Astar
 		};
 	}
 
-	findPath(startNodeId, goalFunc) {
-		return runGenerator(this.findPathGenerator(startNodeId, goalFunc));
+	findPath(startNodeId: GraphNode, goalFunc: Goal) {
+		const pathGenerator = this.findPathGenerator(startNodeId, goalFunc);
+		return runGenerator(pathGenerator);
 	}
+
+	public static Debug: () => typeof Astar;
 }
 
 Astar.Debug = function () {
 	log_level = 1;
-	return Astar;	
+	return Astar;
 }
-
-class Sync
-{
-	constructor() {
-		var astar = new Astar();
-
-		this.h = astar.h;
-
-		this.astar = astar;
-	}
-
-	synclyH(node) {
-		return 0;
-	}
-}
-
-Astar.Sync = Sync;
-
-module.exports = Astar;

@@ -4,6 +4,7 @@
   "description": "A* search algorithm for asynchronous data sources",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
     "test": "jasmine"
   },
   "repository": {

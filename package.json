@@ -26,6 +26,6 @@
   },
   "homepage": "https://github.com/huntwj/a-star-for-async-data#readme",
   "devDependencies": {
-    "jasmine": "^2.5.2"
+    "jasmine": "^2.99.0"
   }
 }

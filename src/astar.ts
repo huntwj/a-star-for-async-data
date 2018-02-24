@@ -26,8 +26,8 @@ interface IBooleanMap {
 }
 
 export interface IAstarOptions<T extends IGraphEdge> {
-	exitArcsForNodeId?: (f: GraphNode) => T[];
-	h?: (f: GraphNode, t: GraphNode) => number;
+	exitArcsForNodeId?: (f: GraphNode) => T[] | Promise<T[]>;
+	h?: (f: GraphNode, t: GraphNode) => number | Promise<number>;
 }
 
 const logLevels = {
@@ -97,7 +97,7 @@ export class Astar<T extends IGraphEdge = IGraphEdge>
 	}
 
 	// Calculate the heuristic cost to traverse from one node to another.
-	public h(from: GraphNode, to: GraphNode) {
+	public h(from: GraphNode, to: GraphNode): number | Promise<number> {
 		return 0;
 	}
 
@@ -150,12 +150,12 @@ export class Astar<T extends IGraphEdge = IGraphEdge>
 	 * ]
 	 *
 	 */
-	exitArcsForNodeId(nodeId: GraphNode): T[] {
+	exitArcsForNodeId(nodeId: GraphNode): T[] | Promise<T[]> {
 		return [];
 	}
 
 	// Promisify exitArcsForNodeId
-	lookupExitArcsForNodeId(nodeId: GraphNode): Promise<T[]> {
+	lookupExitArcsForNodeId(nodeId: GraphNode): T[] | Promise<T[]> {
 		return Promise.resolve(this.exitArcsForNodeId(nodeId));
 	}
 
@@ -234,15 +234,17 @@ export class Astar<T extends IGraphEdge = IGraphEdge>
 			path.unshift(edge);
 		}
 
-		yield {
+		const retVal: IGraphPath<T> = {
 			cost: gCosts[bestId],
 			path: path
 		};
+		yield retVal;
 	}
 
 	findPath(startNodeId: GraphNode, goalFunc: Goal): Promise<IGraphPath<T>> {
 		const pathGenerator = this.findPathGenerator(startNodeId, goalFunc);
-		return runGenerator<T>(pathGenerator);
+		// This needs to be fixed. It may actually be important... ;)
+		return runGenerator<T>(pathGenerator as any);
 	}
 
 	public static Debug: () => typeof Astar;

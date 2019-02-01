@@ -87,7 +87,7 @@ function customHeuristicFunc(nodeId) {
 }
 ```
 
-#### Instantiate the search alrorithm with your custom callbacks
+#### Instantiate the search algorithm with your custom callbacks
 
 Pass an object with the callback functions to the constructor. Note that the
 heuristic function `h` is optional. If none is provided a default zero
